@@ -31,6 +31,7 @@ public class ObligSBinTre<T> implements Beholder<T>
     private int antall; // antall noder
     private int endringer; // antall endringer
     private final Comparator<? super T> comp; // komparator
+
     public ObligSBinTre(Comparator<? super T> c) // konstruktør
     {
         rot = null;
@@ -39,9 +40,28 @@ public class ObligSBinTre<T> implements Beholder<T>
     }
 
     @Override
-    public boolean leggInn(T verdi)
+    public final boolean leggInn(T verdi)    // skal ligge i class SBinTre
     {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        Objects.requireNonNull(verdi, "Ulovlig med nullverdier!");
+
+        Node<T> p = rot, q = null;               // p starter i roten
+        int cmp = 0;                             // hjelpevariabel
+
+        while (p != null)                        // fortsetter til p er ute av treet
+        {
+            q = p;                                 // q er forelder til p
+            cmp = comp.compare(verdi,p.verdi);     // bruker komparatoren
+            p = cmp < 0 ? p.venstre : p.høyre;     // flytter p
+        }
+
+        p = new Node<T>(verdi, q);                   // oppretter en ny node
+
+        if (q == null) rot = p;                  // p blir rotnode
+        else if (cmp < 0) q.venstre = p;         // venstre barn til q
+        else q.høyre = p;                        // høyre barn til q
+
+        antall++;                                // én verdi mer i treet
+        return true;                             // vellykket innlegging
     }
 
     @Override
@@ -78,7 +98,20 @@ public class ObligSBinTre<T> implements Beholder<T>
 
     public int antall(T verdi)
     {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        if(verdi == null) return 0;
+        int antall_forekomster = 0;
+        Node<T> p = rot;
+        while (p != null)
+        {
+            int cmp = comp.compare(verdi, p.verdi);
+            if (cmp < 0) p = p.venstre;
+            else if (cmp > 0) p = p.høyre;
+            else {
+                antall_forekomster++;
+                p = p.høyre;
+            }
+        }
+        return antall_forekomster;
     }
 
     @Override
@@ -95,7 +128,25 @@ public class ObligSBinTre<T> implements Beholder<T>
 
     private static <T> Node<T> nesteInorden(Node<T> p)
     {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        if(p.høyre != null) {
+            p = p.høyre;
+            while (p.venstre != null) {
+                p = p.venstre;
+            }
+            return p;
+        }
+        else if (p.forelder != null){
+            Node<T> q = p;
+            p = p.forelder;
+            while (p != null && p.høyre != q) {
+                q = p;
+                p = p.forelder;
+            }
+            return p;
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
